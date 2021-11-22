@@ -4,7 +4,7 @@ import Button from '@splunk/react-ui/Button';
 import Text from '@splunk/react-ui/Text';
 import Line from '@splunk/visualizations/Line';
 
-import { StyledContainer, StyledGreeting } from './NpmAnalyzerStyles';
+import { StyledContainer } from './NpmAnalyzerStyles';
 
 class NpmAnalyzer extends Component {
     static propTypes = {
@@ -26,13 +26,9 @@ class NpmAnalyzer extends Component {
         const { downloads } = this.state;
         const { dates } = this.state;
         const { message } = this.state;
-
-
-
         const handleChange = (e, { value }) => {
             this.setState({ current_package: value });
         };
-
 
         const handleClick = async () => {
 

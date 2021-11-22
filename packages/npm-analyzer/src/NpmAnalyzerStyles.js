@@ -13,10 +13,4 @@ const StyledContainer = styled.div`
     width: 100%;
 `;
 
-const StyledGreeting = styled.div`
-    font-weight: bold;
-    color: ${variables.brandColor};
-    font-size: ${variables.fontSizeXXLarge};
-`;
-
-export { StyledContainer, StyledGreeting };
+export { StyledContainer };
