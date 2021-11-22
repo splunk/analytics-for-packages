@@ -14,7 +14,7 @@ const themeProviderSettings = getThemeOptions(defaultTheme() || 'enterprise');
 layout(
     <SplunkThemeProvider {...themeProviderSettings}>
         <StyledContainer>
-            <StyledGreeting>NPM Analyzer</StyledGreeting>
+            <StyledGreeting>Package Analyzer</StyledGreeting>
             <NpmAnalyzer name="from inside NpmAnalyzer" />
         </StyledContainer>
     </SplunkThemeProvider>
