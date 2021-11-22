@@ -125,7 +125,12 @@ class NpmAnalyzer extends Component {
 
         var github_entry = ""
         if (package_source == "Github") {
-            github_entry = <><Text defaultValue="Username" canClear onChange={handleGithubUsernameChange} /> <Text defaultValue="Personal Access Token" canClear onChange={handleGithubTokenChange} /></>
+            github_entry = <>
+            <p>Enter Github Username</p>
+            <Text defaultValue="Username" canClear onChange={handleGithubUsernameChange} />
+            <p>Enter a <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token">Personal Access Token</a></p>
+            <Text type="password"
+defaultValue="Personal Access Token" canClear onChange={handleGithubTokenChange} /></>
         }
 
         return (
