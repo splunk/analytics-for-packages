@@ -5,6 +5,7 @@ import Text from '@splunk/react-ui/Text';
 import Select from '@splunk/react-ui/Select';
 
 import Line from '@splunk/visualizations/Line';
+import SingleValue from '@splunk/visualizations/SingleValue';
 
 import { StyledContainer } from './NpmAnalyzerStyles';
 
@@ -20,7 +21,7 @@ class NpmAnalyzer extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            message: "Click 'Get Downloads' to Get Results", fetch_error: "", github_token: "", github_username: "", package_source: "NPM", current_package: "@splunk/create", dates: [''], downloads: ['']
+            message: "Click 'Get Downloads' to Get Results", fetch_error: "", total_downloads: [''], github_token: "", github_username: "", package_source: "NPM", current_package: "@splunk/create", dates: [''], downloads: ['']
         };
     }
     render() {
@@ -32,6 +33,7 @@ class NpmAnalyzer extends Component {
         const { github_token } = this.state;
         const { github_username } = this.state;
         const { fetch_error } = this.state;
+        const { total_downloads } = this.state;
 
 
 
@@ -53,27 +55,28 @@ class NpmAnalyzer extends Component {
 
         const handleClick = async () => {
 
-            this.setState({dates: ['']})
-            this.setState({downloads: ['']})
+            this.setState({ dates: [''] })
+            this.setState({ downloads: [''] })
 
             var new_downloads = []
             var new_dates = []
 
+            var final_downloads = 0
             var response = ""
             if (package_source == "NPM") {
                 response = await fetch("https://api.npmjs.org/downloads/range/last-year/" + current_package)
                     .then(response => {
                         if (response.ok) {
-                            this.setState({fetch_error:""})
+                            this.setState({ fetch_error: "" })
                             return response.json()
                         }
-                        else{
+                        else {
                             throw new Error('Something went wrong');
                         }
                     })
                     .then(result => {
-                        
-                            return result
+
+                        return result
                     })
                     .catch(e => {
                         this.setState({ fetch_error: "Error Fetching Data. " })
@@ -84,7 +87,10 @@ class NpmAnalyzer extends Component {
                 for (const value of response.downloads) {
                     new_downloads.push(value.downloads)
                     new_dates.push(value.day)
+                    final_downloads = final_downloads + value.downloads
                 }
+                this.setState({ total_downloads: [final_downloads] })
+
                 this.setState({ downloads: new_downloads })
                 this.setState({ dates: new_dates })
                 this.setState({ message: "" })
@@ -97,10 +103,10 @@ class NpmAnalyzer extends Component {
                 })
                     .then(response => {
                         if (response.ok) {
-                            this.setState({fetch_error:""})
+                            this.setState({ fetch_error: "" })
                             return response.json()
                         }
-                        else{
+                        else {
                             throw new Error('Something went wrong');
                         }
                     })
@@ -116,7 +122,11 @@ class NpmAnalyzer extends Component {
                 for (const value of response.clones) {
                     new_downloads.push(value.count)
                     new_dates.push(value.timestamp)
+                    final_downloads = final_downloads + value.count
+
                 }
+                this.setState({ total_downloads: [final_downloads] })
+
                 this.setState({ downloads: new_downloads })
                 this.setState({ dates: new_dates })
                 this.setState({ message: "" })
@@ -126,11 +136,11 @@ class NpmAnalyzer extends Component {
         var github_entry = ""
         if (package_source == "Github") {
             github_entry = <>
-            <p>Enter Github Username</p>
-            <Text defaultValue="Username" canClear onChange={handleGithubUsernameChange} />
-            <p>Enter a <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token">Personal Access Token</a></p>
-            <Text type="password"
-defaultValue="Personal Access Token" canClear onChange={handleGithubTokenChange} /></>
+                <p>Enter Github Username</p>
+                <Text defaultValue="Username" canClear onChange={handleGithubUsernameChange} />
+                <p>Enter a <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token">Personal Access Token</a></p>
+                <Text type="password"
+                    defaultValue="Personal Access Token" canClear onChange={handleGithubTokenChange} /></>
         }
 
         return (
@@ -151,6 +161,8 @@ defaultValue="Personal Access Token" canClear onChange={handleGithubTokenChange}
                 />
                 <h1>{current_package}</h1>
                 <p>{message}</p>
+                <p>Downloads (Over Time)</p>
+
                 <Line
                     options={{}}
                     dataSources={{
@@ -159,7 +171,7 @@ defaultValue="Personal Access Token" canClear onChange={handleGithubTokenChange}
                             data: {
                                 fields: [
                                     {
-                                        name: 'Date',
+                                        name: '_time',
                                     },
                                     {
                                         name: 'Downloads',
@@ -175,6 +187,38 @@ defaultValue="Personal Access Token" canClear onChange={handleGithubTokenChange}
                         },
                     }}
                 />
+                <p>Total Downloads</p>
+                <SingleValue
+        options={{}}
+        dataSources={{
+            primary: {
+                data: {
+                    columns: [
+                        total_downloads,
+                        [
+                            '2018-08-19T00:00:00.000+00:00',
+                            '2018-08-20T00:00:00.000+00:00',
+                            '2018-08-21T00:00:00.000+00:00',
+                            '2018-08-22T00:00:00.000+00:00',
+                            '2018-08-23T00:00:00.000+00:00',
+                            '2018-08-24T00:00:00.000+00:00',
+                            '2018-08-25T00:00:00.000+00:00',
+                            '2018-08-26T00:00:00.000+00:00',
+                        ],
+                    ],
+                    fields: [
+                        {
+                            name: 'foo',
+                        },
+                        {
+                            name: '_time',
+                        },
+                    ],
+                },
+                meta: {},
+            },
+        }}
+    />
             </StyledContainer>
         );
     }
