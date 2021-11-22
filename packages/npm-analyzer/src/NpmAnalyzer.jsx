@@ -18,20 +18,14 @@ class NpmAnalyzer extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: "Click 'Get Downloads' to Get Results", current_package: "@splunk/create", dates: [
-                '2018-05-02T18:10:46.000-07:00',
-                '2018-05-02T18:11:47.000-07:00',
-                '2018-05-02T18:12:48.000-07:00',
-                '2018-05-02T18:13:49.000-07:00',
-                '2018-05-02T18:15:50.000-07:00',
-            ], downloads: ['600', '525', '295', '213', '122', '19']
+            message: "Click 'Get Downloads' to Get Results", current_package: "@splunk/create", dates: [''], downloads: ['']
         };
     }
     render() {
-        const { data } = this.state;
         const { current_package } = this.state;
         const { downloads } = this.state;
         const { dates } = this.state;
+        const { message } = this.state;
 
 
 
@@ -59,9 +53,9 @@ class NpmAnalyzer extends Component {
                 new_downloads.push(value.downloads)
                 new_dates.push(value.day)
             }
-
             this.setState({ downloads: new_downloads })
             this.setState({ dates: new_dates })
+            this.setState({ message: "" })
 
         }
 
@@ -75,6 +69,7 @@ class NpmAnalyzer extends Component {
                     onClick={handleClick}
                 />
                 <h1>{current_package}</h1>
+                <p>{message}</p>
                 <Line
                     options={{}}
                     dataSources={{
