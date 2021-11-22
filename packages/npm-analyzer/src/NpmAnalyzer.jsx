@@ -78,10 +78,10 @@ class NpmAnalyzer extends Component {
                             data: {
                                 fields: [
                                     {
-                                        name: '_time',
+                                        name: 'Date',
                                     },
                                     {
-                                        name: 'count',
+                                        name: 'Downloads',
                                         type_special: 'count',
                                     },
                                 ],
