@@ -135,7 +135,7 @@ defaultValue="Personal Access Token" canClear onChange={handleGithubTokenChange}
 
         return (
             <StyledContainer stye={{ width: '100%' }}>
-                <div>Enter NPM Package or Github Repo (This should include org/owner and the repo name. For example: @splunk/create or ):</div>
+                <div>Enter NPM Package or Github Repo (This should include org/owner and the repo name. For example: @splunk/create for NPM or splunk/dashpub for Github):</div>
                 <Text defaultValue="@splunk/create" canClear onChange={handleChange} />
                 <p>{fetch_error}</p>
                 <Select value={package_source} onChange={handleRepoChange}>
