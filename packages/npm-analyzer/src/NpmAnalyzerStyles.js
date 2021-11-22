@@ -10,6 +10,7 @@ const StyledContainer = styled.div`
     border-radius: ${variables.borderRadius};
     box-shadow: ${variables.overlayShadow};
     background-color: ${variables.backgroundColor};
+    width: 100%;
 `;
 
 const StyledGreeting = styled.div`
