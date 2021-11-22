@@ -1,4 +1,4 @@
-# Contributing to SplunkAnalyticsNpm
+# Contributing to Splunk Analytics for Package Managers
 
 ## Overview
 
