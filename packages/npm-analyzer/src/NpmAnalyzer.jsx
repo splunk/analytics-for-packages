@@ -20,21 +20,25 @@ class NpmAnalyzer extends Component {
 
     constructor(props) {
         super(props);
+
+        var search = window.location.search
+        const params = new URLSearchParams(search);
+        const url_param_package = params.get('package')
+
         this.state = {
-            message: "Click 'Get Downloads' to Get Results", fetch_error: "", total_downloads: [''], github_token: "", github_username: "", package_source: "NPM", current_package: "@splunk/create", dates: [''], downloads: ['']
+            message: "Click 'Get Downloads' to Get Results", visualizations: [], fetch_error: "", total_downloads: [''], github_token: "", github_username: "", package_source: "NPM", current_package: url_param_package, dates: [''], downloads: ['']
         };
+
     }
+
     render() {
         const { current_package } = this.state;
-        const { downloads } = this.state;
-        const { dates } = this.state;
         const { message } = this.state;
         const { package_source } = this.state;
         const { github_token } = this.state;
         const { github_username } = this.state;
         const { fetch_error } = this.state;
-        const { total_downloads } = this.state;
-
+        const { visualizations } = this.state
 
 
         const handleChange = (e, { value }) => {
@@ -51,85 +55,199 @@ class NpmAnalyzer extends Component {
             this.setState({ github_token: value });
         };
 
-        const toggle = <Button appearance="toggle" label="Select Package Source" isMenu />;
+        const textLoad = (e) => {
+            console.log("Loaded")
+
+        };
+
+
 
         const handleClick = async () => {
 
-            this.setState({ dates: [''] })
-            this.setState({ downloads: [''] })
 
-            var new_downloads = []
-            var new_dates = []
+            if (current_package) {
+                var packages = current_package.split(", ")
 
-            var final_downloads = 0
-            var response = ""
-            if (package_source == "NPM") {
-                response = await fetch("https://api.npmjs.org/downloads/range/last-year/" + current_package)
-                    .then(response => {
-                        if (response.ok) {
-                            this.setState({ fetch_error: "" })
-                            return response.json()
+                this.setState({ dates: [''] })
+                this.setState({ downloads: [''] })
+
+                var visuals = []
+                var i = 0
+                for (const repo of packages) {
+                    var i = i + 1
+                    var new_downloads = []
+                    var new_dates = []
+
+                    var final_downloads = 0
+                    var response = ""
+
+                    if (package_source == "NPM") {
+                        response = await fetch("https://api.npmjs.org/downloads/range/last-year/" + repo)
+                            .then(response => {
+                                if (response.ok) {
+                                    this.setState({ fetch_error: "" })
+                                    return response.json()
+                                }
+                                else {
+                                    throw new Error('Something went wrong');
+                                }
+                            })
+                            .then(result => {
+
+                                return result
+                            })
+                            .catch(e => {
+                                this.setState({ fetch_error: "Error Fetching Data. " })
+                                this.setState({ ...this.state, isFetching: false });
+                            });
+
+
+                        for (const value of response.downloads) {
+                            new_downloads.push(value.downloads)
+                            new_dates.push(value.day)
+                            final_downloads = final_downloads + value.downloads
                         }
-                        else {
-                            throw new Error('Something went wrong');
-                        }
-                    })
-                    .then(result => {
-
-                        return result
-                    })
-                    .catch(e => {
-                        this.setState({ fetch_error: "Error Fetching Data. " })
-                        this.setState({ ...this.state, isFetching: false });
-                    });
 
 
-                for (const value of response.downloads) {
-                    new_downloads.push(value.downloads)
-                    new_dates.push(value.day)
-                    final_downloads = final_downloads + value.downloads
-                }
-                this.setState({ total_downloads: [final_downloads] })
+                        visuals.push(<div key={i}><h1>{repo}</h1><div style={flexContainer}>
+                            <div style={flexChildLine}>
+                                <p>Downloads (Over Time)</p>
 
-                this.setState({ downloads: new_downloads })
-                this.setState({ dates: new_dates })
-                this.setState({ message: "" })
-            }
-            if (package_source == "Github") {
-                response = await fetch("https://api.github.com/repos/" + current_package + "/traffic/clones", {
-                    headers: {
-                        'Authorization': 'Basic ' + btoa(github_username + ":" + github_token)
+                                <Line
+                                    options={{}}
+                                    dataSources={{
+                                        primary: {
+                                            requestParams: { offset: 0, count: 20 },
+                                            data: {
+                                                fields: [
+                                                    {
+                                                        name: '_time',
+                                                    },
+                                                    {
+                                                        name: 'Downloads',
+                                                        type_special: 'count',
+                                                    },
+                                                ],
+                                                columns: [
+                                                    new_dates,
+                                                    new_downloads,
+                                                ],
+                                            },
+                                            meta: { totalCount: 20 },
+                                        },
+                                    }}
+                                /></div>
+                            <div style={flexChildSV}>
+                                <p>Total Downloads</p>
+                                <SingleValue
+                                    options={{}}
+                                    dataSources={{
+                                        primary: {
+                                            data: {
+                                                columns: [
+                                                    [final_downloads]
+
+                                                ],
+                                                fields: [
+                                                    {
+                                                        name: 'Count',
+                                                    }
+                                                ],
+                                            },
+                                            meta: {},
+                                        },
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        </div>)
+
                     }
-                })
-                    .then(response => {
-                        if (response.ok) {
-                            this.setState({ fetch_error: "" })
-                            return response.json()
-                        }
-                        else {
-                            throw new Error('Something went wrong');
-                        }
-                    })
-                    .then(result => {
-                        return result
-                    })
-                    .catch(e => {
-                        console.log("ERRORRRRR")
-                        this.setState({ fetch_error: "Error Fetching Data. Verify you have a personal access token and it has push permissions to the repository" })
-                        this.setState({ ...this.state, isFetching: false });
-                    });
+                    if (package_source == "Github") {
+                        response = await fetch("https://api.github.com/repos/" + repo + "/traffic/clones", {
+                            headers: {
+                                'Authorization': 'Basic ' + btoa(github_username + ":" + github_token)
+                            }
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    this.setState({ fetch_error: "" })
+                                    return response.json()
+                                }
+                                else {
+                                    throw new Error('Something went wrong');
+                                }
+                            })
+                            .then(result => {
+                                return result
+                            })
+                            .catch(e => {
+                                console.log("ERROR")
+                                this.setState({ fetch_error: "Error Fetching Data. Verify you have a personal access token and it has push permissions to the repository" })
+                                this.setState({ ...this.state, isFetching: false });
+                            });
 
-                for (const value of response.clones) {
-                    new_downloads.push(value.count)
-                    new_dates.push(value.timestamp)
-                    final_downloads = final_downloads + value.count
+                        for (const value of response.clones) {
+                            new_downloads.push(value.count)
+                            new_dates.push(value.timestamp)
+                            final_downloads = final_downloads + value.count
 
+                        }
+
+                        visuals.push(<><h1>{repo}</h1><div style={flexContainer}>
+                            <div style={flexChildLine}>
+                                <p>Downloads (Over Time)</p>
+
+                                <Line
+                                    options={{}}
+                                    dataSources={{
+                                        primary: {
+                                            requestParams: { offset: 0, count: 20 },
+                                            data: {
+                                                fields: [
+                                                    {
+                                                        name: '_time',
+                                                    },
+                                                    {
+                                                        name: 'Downloads',
+                                                        type_special: 'count',
+                                                    },
+                                                ],
+                                                columns: [
+                                                    new_dates,
+                                                    new_downloads,
+                                                ],
+                                            },
+                                            meta: { totalCount: 20 },
+                                        },
+                                    }}
+                                /></div>
+                            <div style={flexChildSV}>
+                                <p>Total Downloads</p>
+                                <SingleValue
+                                    options={{}}
+                                    dataSources={{
+                                        primary: {
+                                            data: {
+                                                columns: [
+                                                    [final_downloads]
+
+                                                ],
+                                                fields: [
+                                                    {
+                                                        name: 'Count',
+                                                    }
+                                                ],
+                                            },
+                                            meta: {},
+                                        },
+                                    }}
+                                />
+                            </div>
+                        </div></>)
+                    }
                 }
-                this.setState({ total_downloads: [final_downloads] })
-
-                this.setState({ downloads: new_downloads })
-                this.setState({ dates: new_dates })
-                this.setState({ message: "" })
+                this.setState({ visualizations: visuals })
             }
         }
 
@@ -143,10 +261,21 @@ class NpmAnalyzer extends Component {
                     defaultValue="Personal Access Token" canClear onChange={handleGithubTokenChange} /></>
         }
 
+        const flexContainer = {
+            display: "flex"
+        }
+
+        const flexChildSV = {
+            flex: "1",
+        }
+        const flexChildLine = {
+            flex: "2",
+        }
+
         return (
             <StyledContainer stye={{ width: '100%' }}>
-                <div>Enter NPM Package or Github Repo (This should include org/owner and the repo name. For example: @splunk/create for NPM or splunk/dashpub for Github):</div>
-                <Text defaultValue="@splunk/create" canClear onChange={handleChange} />
+                <div>Enter NPM Package or Github Repo. This should include org/owner and the repo name. For example: @splunk/create for NPM or splunk/dashpub for Github. We also accept comma separated list of repos for example: @splunk/creact, @splunk/react-ui:</div>
+                <Text onLoad={textLoad()} id="packagelist" defaultValue={current_package} canClear onChange={handleChange} />
                 <p>{fetch_error}</p>
                 <Select value={package_source} onChange={handleRepoChange}>
                     <Select.Option label="Github" value="Github" />
@@ -159,66 +288,11 @@ class NpmAnalyzer extends Component {
                     appearance="primary"
                     onClick={handleClick}
                 />
-                <h1>{current_package}</h1>
                 <p>{message}</p>
-                <p>Downloads (Over Time)</p>
+                <>
+                    {visualizations.map((visualization) => <div>{visualization}</div>)}
+                </>
 
-                <Line
-                    options={{}}
-                    dataSources={{
-                        primary: {
-                            requestParams: { offset: 0, count: 20 },
-                            data: {
-                                fields: [
-                                    {
-                                        name: '_time',
-                                    },
-                                    {
-                                        name: 'Downloads',
-                                        type_special: 'count',
-                                    },
-                                ],
-                                columns: [
-                                    dates,
-                                    downloads,
-                                ],
-                            },
-                            meta: { totalCount: 20 },
-                        },
-                    }}
-                />
-                <p>Total Downloads</p>
-                <SingleValue
-        options={{}}
-        dataSources={{
-            primary: {
-                data: {
-                    columns: [
-                        total_downloads,
-                        [
-                            '2018-08-19T00:00:00.000+00:00',
-                            '2018-08-20T00:00:00.000+00:00',
-                            '2018-08-21T00:00:00.000+00:00',
-                            '2018-08-22T00:00:00.000+00:00',
-                            '2018-08-23T00:00:00.000+00:00',
-                            '2018-08-24T00:00:00.000+00:00',
-                            '2018-08-25T00:00:00.000+00:00',
-                            '2018-08-26T00:00:00.000+00:00',
-                        ],
-                    ],
-                    fields: [
-                        {
-                            name: 'foo',
-                        },
-                        {
-                            name: '_time',
-                        },
-                    ],
-                },
-                meta: {},
-            },
-        }}
-    />
             </StyledContainer>
         );
     }
