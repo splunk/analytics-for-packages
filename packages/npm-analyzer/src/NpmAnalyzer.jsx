@@ -97,7 +97,7 @@ class NpmAnalyzer extends Component {
                                 return result
                             })
                             .catch(e => {
-                                this.setState({ fetch_error: "Error Fetching Data. " })
+                                this.setState({ fetch_error: "Error Fetching Data. Repo Name: "+ repo })
                                 this.setState({ ...this.state, isFetching: false });
                             });
 
@@ -183,7 +183,7 @@ class NpmAnalyzer extends Component {
                             })
                             .catch(e => {
                                 console.log("ERROR")
-                                this.setState({ fetch_error: "Error Fetching Data. Verify you have a personal access token and it has push permissions to the repository" })
+                                this.setState({ fetch_error: "Error Fetching Data. Verify you have a personal access token and it has push permissions to the repository. Repo Name: " + repo })
                                 this.setState({ ...this.state, isFetching: false });
                             });
 
@@ -274,7 +274,11 @@ class NpmAnalyzer extends Component {
 
         return (
             <StyledContainer stye={{ width: '100%' }}>
-                <div>Enter NPM Package or Github Repo. This should include org/owner and the repo name. For example: @splunk/create for NPM or splunk/dashpub for Github. We also accept comma separated list of repos for example: @splunk/creact, @splunk/react-ui:</div>
+                <div><strong>Enter NPM Package or Github Repo. This should include org/owner and the repo name.</strong>
+                    <br/>
+                    For example: @splunk/create for NPM or splunk/dashpub for Github. 
+                    <br/>
+                    We also accept comma separated list of repos for example: @splunk/creact, @splunk/react-ui:</div>
                 <Text onLoad={textLoad()} id="packagelist" defaultValue={current_package} canClear onChange={handleChange} />
                 <p>{fetch_error}</p>
                 <Select value={package_source} onChange={handleRepoChange}>
