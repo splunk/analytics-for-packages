@@ -278,7 +278,7 @@ class NpmAnalyzer extends Component {
                     <br/>
                     For example: @splunk/create for NPM or splunk/dashpub for Github. 
                     <br/>
-                    We also accept comma separated list of repos for example: @splunk/creact, @splunk/react-ui:</div>
+                    We also accept comma separated list of repos for example: @splunk/create, @splunk/react-ui:</div>
                 <Text onLoad={textLoad()} id="packagelist" defaultValue={current_package} canClear onChange={handleChange} />
                 <p>{fetch_error}</p>
                 <Select value={package_source} onChange={handleRepoChange}>
