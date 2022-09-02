@@ -20,9 +20,10 @@
   },
   "main": "NpmAnalyzer.js",
   "dependencies": {
-    "@splunk/react-ui": "^4.4.1",
-    "@splunk/themes": "^0.8.0",
-    "@splunk/visualizations": "^23.5.0",
+    "@splunk/react-ui": "^4.11.0",
+    "@splunk/themes": "^0.12.0",
+    "@splunk/visualizations": "^25.0.0",
+    "@splunk/visualization-context": "^25.0.0",
     "react-router-dom": "^6.0.2"
   },
   "devDependencies": {
